@@ -1,16 +1,29 @@
 import streamlit as st
 import google.generativeai as genai
-from streamlit_mic_recorder import mic_recorder
 
-st.set_page_config(page_title="JARVIS AI: Tactical Protocol", layout="centered")
+st.set_page_config(page_title="JARVIS AI", layout="centered")
 
 # ตั้งค่า API
 if "GOOGLE_API_KEY" in st.secrets:
     genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
+    # ใช้รุ่นนี้ที่เสถียรที่สุด
     model = genai.GenerativeModel('gemini-1.5-flash')
 else:
-    st.error("ไม่ได้ตั้งค่า API Key!")
+    st.error("ไม่ได้ตั้งค่า API Key ใน Secrets!")
     st.stop()
+
+# --- UI ---
+st.markdown('<div style="background:rgba(0,20,40,0.7); border:1px solid #00e5ff; padding:20px; border-radius:15px; text-align:center;"><h2>JARVIS AI SYSTEM</h2></div>', unsafe_allow_html=True)
+
+# ช่องพิมพ์คำสั่ง (เอาไว้ก่อนเพื่อความชัวร์)
+user_input = st.text_input("INPUT COMMAND:", placeholder="พิมพ์คำสั่งที่นี่...")
+
+if user_input:
+    try:
+        response = model.generate_content(user_input)
+        st.success(f"JARVIS: {response.text}")
+    except Exception as e:
+        st.error(f"ระบบขัดข้อง: {e}")
 
 # --- CSS ไฮเทค ---
 st.markdown("""
