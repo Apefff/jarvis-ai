@@ -1,6 +1,23 @@
 import streamlit as st
 import base64
+import google.generativeai as genai
 
+st.title("🦜 JARVIS AI: Tactical Protocol")
+
+# ดึงจาก Secrets ที่เราตั้งค่าไว้ใน Streamlit Cloud โดยตรง
+if "GOOGLE_API_KEY" in st.secrets:
+    api_key = st.secrets["GOOGLE_API_KEY"]
+    genai.configure(api_key=api_key)
+    model = genai.GenerativeModel('gemini-1.5-flash')
+else:
+    st.error("ไม่ได้ตั้งค่า API Key ใน Secrets โปรดตั้งค่าก่อน!")
+    st.stop()
+
+# ต่อไปก็สั่งงานได้เลยไม่ต้องใส่ Key ซ้ำ
+user_input = st.text_input("สั่งการ JARVIS:")
+if user_input:
+    response = model.generate_content(user_input)
+    st.write(f"**JARVIS:** {response.text}")
 # --- SET PAGE CONFIG ---
 st.set_page_config(page_title="JARVIS AI: Tactical Protocol", layout="wide")
 
