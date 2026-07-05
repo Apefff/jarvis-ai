@@ -4,32 +4,38 @@ import google.generativeai as genai
 # 1. ตั้งค่าหน้าเว็บ
 st.set_page_config(page_title="JARVIS-X Protocol", layout="centered")
 
-# 2. ตั้งค่า API แบบ Secure
+# 2. ตั้งค่า API
 api_key = st.secrets.get("GOOGLE_API_KEY")
 if not api_key:
-    st.error("ตั้งค่า GOOGLE_API_KEY ใน Secrets ด้วยครับบอส!")
+    st.error("ตั้งค่า GOOGLE_API_KEY ใน Secrets ครับบอส!")
     st.stop()
 
 genai.configure(api_key=api_key)
 model = genai.GenerativeModel('gemini-1.5-flash')
 
-# 3. CSS ไฮเทคแบบ Hologram (เน้นสีฟ้าตัดดำน้ำเงินเทา)
+# 3. CSS ไฮเทคแบบ Hologram Grid (นี่คือหัวใจของความล้ำ!)
 st.markdown("""
     <style>
+        /* สร้างพื้นหลังเป็นเส้นตาราง Grid เรืองแสง */
         [data-testid="stAppViewContainer"] { 
-            background: linear-gradient(135deg, #050a12 0%, #0a192f 100%); 
-            color: #00e5ff; font-family: 'Courier New', Courier, monospace; 
+            background-color: #050a12;
+            background-image: 
+                linear-gradient(rgba(0, 229, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 229, 255, 0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            color: #00e5ff; font-family: 'Orbitron', sans-serif; 
         }
         .holo-frame { 
-            border: 2px solid #00e5ff; border-radius: 20px; padding: 25px; 
-            background: rgba(10, 25, 47, 0.6); box-shadow: 0 0 30px rgba(0, 229, 255, 0.2);
+            border: 1px solid #00e5ff; padding: 25px; border-radius: 10px;
+            background: rgba(10, 25, 47, 0.8); box-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
             text-align: center; margin-bottom: 20px;
         }
         .parrot-img { 
-            width: 150px; border-radius: 50%; border: 2px solid #64ffda;
-            filter: drop-shadow(0 0 15px #64ffda);
+            width: 150px; border-radius: 50%; border: 2px solid #00e5ff;
+            filter: drop-shadow(0 0 10px #00e5ff);
         }
-        .stChatInput { border: 1px solid #00e5ff !important; background: #000 !important; }
+        /* ปรับสีช่องพิมพ์ให้เข้ากับธีม */
+        .stChatInput { border: 2px solid #00e5ff !important; background: #000 !important; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -37,7 +43,7 @@ st.markdown("""
 st.markdown('<div class="holo-frame">', unsafe_allow_html=True)
 st.markdown("<h1 style='color:#64ffda; text-shadow: 0 0 10px #64ffda;'>JARVIS-X SYSTEM</h1>", unsafe_allow_html=True)
 st.markdown('<img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJw_EJsDjFwVDtWxMW0nTQ_A5r4mxFrEWpa4Xe9inoeQ&s=10" class="parrot-img">', unsafe_allow_html=True)
-st.markdown('<p style="color:#8892b0;">TACTICAL PROTOCOL: ONLINE</p>', unsafe_allow_html=True)
+st.markdown('<p style="color:#ffffff; font-size: 0.8rem;">TACTICAL PROTOCOL: ACTIVE</p>', unsafe_allow_html=True)
 st.markdown('</div>', unsafe_allow_html=True)
 
 # 5. Chat Logic
@@ -46,8 +52,7 @@ for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(f"<span style='color: {'#ffffff' if msg['role']=='user' else '#00e5ff'};'>{msg['content']}</span>", unsafe_allow_html=True)
 
-# ช่องพิมพ์
-if prompt := st.chat_input("Input Command..."):
+if prompt := st.chat_input("Command..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(f"<span style='color: #ffffff;'>{prompt}</span>", unsafe_allow_html=True)
@@ -57,5 +62,5 @@ if prompt := st.chat_input("Input Command..."):
             response = model.generate_content(prompt)
             st.markdown(f"<span style='color: #00e5ff;'>{response.text}</span>", unsafe_allow_html=True)
             st.session_state.messages.append({"role": "assistant", "content": response.text})
-        except Exception as e:
-            st.error("ระบบติดขัด: โปรดตรวจสอบ API Key อีกครั้ง")
+        except Exception:
+            st.error("ระบบติดขัดเล็กน้อย")
