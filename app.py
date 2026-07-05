@@ -2,65 +2,49 @@ import streamlit as st
 import google.generativeai as genai
 
 # 1. ตั้งค่าหน้าเว็บ
-st.set_page_config(page_title="JARVIS-X Protocol", layout="centered")
+st.set_page_config(page_title="JARVIS-X", layout="centered")
 
-# 2. ตั้งค่า API
+# 2. API Config
 api_key = st.secrets.get("GOOGLE_API_KEY")
 if not api_key:
-    st.error("ตั้งค่า GOOGLE_API_KEY ใน Secrets ครับบอส!")
+    st.error("บอสยังไม่ได้ใส่ API Key ใน Secrets!")
     st.stop()
 
 genai.configure(api_key=api_key)
-model = genai.GenerativeModel('gemini-1.5-flash')
+# เปลี่ยนมาใช้รุ่นนี้แทน ถ้าอันเดิมหาไม่เจอ
+model = genai.GenerativeModel('gemini-pro')
 
-# 3. CSS ไฮเทคแบบ Hologram Grid (นี่คือหัวใจของความล้ำ!)
+# 3. CSS โฮโลแกรม
 st.markdown("""
     <style>
-        /* สร้างพื้นหลังเป็นเส้นตาราง Grid เรืองแสง */
         [data-testid="stAppViewContainer"] { 
-            background-color: #050a12;
-            background-image: 
-                linear-gradient(rgba(0, 229, 255, 0.1) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 229, 255, 0.1) 1px, transparent 1px);
+            background: #050a12; color: #00e5ff; 
+            background-image: linear-gradient(rgba(0,229,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0,229,255,0.05) 1px, transparent 1px);
             background-size: 40px 40px;
-            color: #00e5ff; font-family: 'Orbitron', sans-serif; 
         }
-        .holo-frame { 
-            border: 1px solid #00e5ff; padding: 25px; border-radius: 10px;
-            background: rgba(10, 25, 47, 0.8); box-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
-            text-align: center; margin-bottom: 20px;
-        }
-        .parrot-img { 
-            width: 150px; border-radius: 50%; border: 2px solid #00e5ff;
-            filter: drop-shadow(0 0 10px #00e5ff);
-        }
-        /* ปรับสีช่องพิมพ์ให้เข้ากับธีม */
-        .stChatInput { border: 2px solid #00e5ff !important; background: #000 !important; }
+        .holo-box { border: 1px solid #00e5ff; padding: 20px; background: rgba(10,25,47,0.8); text-align: center; border-radius: 10px; }
     </style>
 """, unsafe_allow_html=True)
 
-# 4. UI Layout
-st.markdown('<div class="holo-frame">', unsafe_allow_html=True)
-st.markdown("<h1 style='color:#64ffda; text-shadow: 0 0 10px #64ffda;'>JARVIS-X SYSTEM</h1>", unsafe_allow_html=True)
-st.markdown('<img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJw_EJsDjFwVDtWxMW0nTQ_A5r4mxFrEWpa4Xe9inoeQ&s=10" class="parrot-img">', unsafe_allow_html=True)
-st.markdown('<p style="color:#ffffff; font-size: 0.8rem;">TACTICAL PROTOCOL: ACTIVE</p>', unsafe_allow_html=True)
-st.markdown('</div>', unsafe_allow_html=True)
+# 4. UI
+st.markdown('<div class="holo-box"><h1>JARVIS-X SYSTEM</h1><p>PROTOCOL ONLINE</p></div>', unsafe_allow_html=True)
+st.markdown('<div style="text-align:center;"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJw_EJsDjFwVDtWxMW0nTQ_A5r4mxFrEWpa4Xe9inoeQ&s=10" width="120" style="border-radius:50%; border:2px solid #00e5ff;"></div>', unsafe_allow_html=True)
 
-# 5. Chat Logic
+# 5. Chat Logic แบบเสถียรสุดๆ
 if "messages" not in st.session_state: st.session_state.messages = []
-for msg in st.session_state.messages:
-    with st.chat_message(msg["role"]):
-        st.markdown(f"<span style='color: {'#ffffff' if msg['role']=='user' else '#00e5ff'};'>{msg['content']}</span>", unsafe_allow_html=True)
 
-if prompt := st.chat_input("Command..."):
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]): st.write(msg["content"])
+
+if prompt := st.chat_input("Input Command..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.markdown(f"<span style='color: #ffffff;'>{prompt}</span>", unsafe_allow_html=True)
+    with st.chat_message("user"): st.write(prompt)
     
     with st.chat_message("assistant"):
         try:
+            # ใช้ model.generate_content แบบนี้เสถียรที่สุด
             response = model.generate_content(prompt)
-            st.markdown(f"<span style='color: #00e5ff;'>{response.text}</span>", unsafe_allow_html=True)
+            st.write(response.text)
             st.session_state.messages.append({"role": "assistant", "content": response.text})
-        except Exception:
-            st.error("ระบบติดขัดเล็กน้อย")
+        except Exception as e:
+            st.error("โมเดลขัดข้อง ลองเช็ค API Key ในโปรเจกต์ว่าเปิดใช้งาน Gemini Pro หรือยัง?")
